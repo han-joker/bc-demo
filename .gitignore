@@ -8,3 +8,7 @@ ehthumbs.db
 Thumbs.db
 .idea
 *.exe
+testdb/
+data/
+gob-test.go
+leveldb-test.go
