@@ -3,6 +3,7 @@ package blockchain
 import (
 	"fmt"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/util"
 	"log"
 	"time"
 )
@@ -92,6 +93,20 @@ func (bc *BlockChain) Iterate() {
 
 		hash = b.header.hashPrevBlock
 	}
+}
+
+func (bc *BlockChain) Clear() {
+	// 数据库中全部区块链的 key 全部删除
+	bc.db.Delete([]byte("lastHash"), nil)
+	// 迭代删除，全部的 b_ 的key
+	iter := bc.db.NewIterator(util.BytesPrefix([]byte("b_")), nil)
+	for iter.Next() {
+		bc.db.Delete(iter.Key(),nil)
+	}
+	iter.Release()
+
+	// 清空 bc 对象
+	bc.lastHash = ""
 }
 
 
