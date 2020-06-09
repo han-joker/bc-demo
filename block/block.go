@@ -1,14 +1,15 @@
-package blockchain
+package block
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"time"
 )
 
 type Hash = string
 
+const HashLen = 256
 const nodeVersion = 0
+const blockBits = 16
 
 // 区块主体
 type Block struct {
@@ -36,33 +37,59 @@ func NewBlock(prevHash Hash, txs string) *Block {
 			version:       nodeVersion,
 			hashPrevBlock: prevHash, // 设置前面的区块哈希
 			time:          time.Now(),
+			bits:	blockBits,
 		},
 		txs:       txs, // 设置数据
 		txCounter: 1,   // 计数交易
 	}
-	// 计算设置当前区块的哈希
-	b.SetHashCurr()
 	return b
 }
 
-// 头信息的字符串化
-func (bh *BlockHeader) Stringify() string {
-	return fmt.Sprintf("%d%s%s%d%d%d",
-		bh.version,
-		bh.hashPrevBlock,
-		bh.hashMerkleRoot,
-		bh.time.UnixNano(), // 得到时间戳，nano 级别
-		bh.bits,
-		bh.nonce,
+// bits 属性的getter
+func (b *Block) GetBits() int {
+	return b.header.bits
+}
+
+// 生成用于 POW（hashCash）的服务字符串
+func (b *Block) GenServiceStr() string {
+	return fmt.Sprintf("%d%s%s%s%d",
+		b.header.version,
+		b.header.hashPrevBlock,
+		b.header.hashMerkleRoot,
+		b.header.time.Format("2006-01-02 15:04:05.999999999 -0700 MST"),
+		b.header.bits,
 	)
 }
 
-// 设置当前区块 hash
-func (b *Block) SetHashCurr() *Block {
-	// 生成头信息的拼接字符串
-	headerStr := b.header.Stringify()
-	// 计算 hash 值
-	b.hashCurr = fmt.Sprintf("%x", sha256.Sum256([]byte(headerStr)))
+// nonce Setter
+func (b *Block) SetNonce(nonce int) *Block {
+	b.header.nonce = nonce
 
 	return b
 }
+
+// 设置当前区块 hash
+func (b *Block) SetHashCurr(hash Hash) *Block {
+	// 计算 hash 值
+	b.hashCurr = hash
+
+	return b
+}
+// getters!
+func (b *Block) GetHashCurr() Hash {
+	return b.hashCurr
+}
+func (b *Block) GetTxs() string {
+	return b.txs
+}
+func (b *Block) GetTime() time.Time {
+	return b.header.time
+}
+func (b *Block) GetHashPrevBlock() Hash {
+	return b.header.hashPrevBlock
+}
+func (b *Block) GetNonce() int {
+	return b.header.nonce
+}
+
+

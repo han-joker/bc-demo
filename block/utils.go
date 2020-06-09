@@ -1,4 +1,4 @@
-package blockchain
+package block
 
 import (
 	"bytes"
@@ -14,9 +14,9 @@ type BlockData struct {
 	Time           time.Time
 	Bits           int
 	Nonce          int
-	Txs       string
-	TxCounter int
-	HashCurr  Hash
+	Txs            string
+	TxCounter      int
+	HashCurr       Hash
 }
 
 // 区块序列化
