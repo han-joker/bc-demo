@@ -104,29 +104,23 @@ func (bc *BlockChain) GetBlock(hash block.Hash) (*block.Block, error) {
 
 // 迭代展示区块的方法
 func (bc *BlockChain) Iterate() {
-	// 最后的哈希
-	for hash := bc.lastHash; hash != ""; {
-		// 得到区块
-		b, err := bc.GetBlock(hash)
-		if err != nil {
-			log.Fatalf("Block <%s> is not exists.", hash)
-		}
+	// 构建迭代器
+	bci := NewBCIterator(bc)
+	for b, err := bci.Next(); err == nil; b, err = bci.Next(){
 		// 做 hashcash 验证
 		pow := pow.NewPOW(b)
 		if !pow.Validate() {
-			log.Fatalf("Block <%s> is not Valid.", hash)
+			log.Fatalf("Block <%s> is not Valid.", b.GetHashCurr())
 			continue
 		}
 
 		fmt.Println("HashCurr:", b.GetHashCurr())
-		//fmt.Println("TXs:", b.GetTxs())
 		fmt.Println("TXs:", b.GetTxsString())
 		fmt.Println("Time:", b.GetTime().Format(time.UnixDate))
 		fmt.Println("HashPrev:", b.GetHashPrevBlock())
 		fmt.Println()
-
-		hash = b.GetHashPrevBlock()
 	}
+
 }
 
 func (bc *BlockChain) Clear() {
