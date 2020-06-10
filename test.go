@@ -1,11 +1,13 @@
 package main
 
+//import "golang.org/x/crypto/ripemd160"
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
-	"time"
+	"github.com/tyler-smith/go-bip32"
+	"github.com/tyler-smith/go-bip39"
 )
+//"github.com/tyler-smith/go-bip32"
+
 
 func main() {
 	//// 数据库连接
@@ -71,17 +73,64 @@ func main() {
 	//}
 
 
-	t := time.Now()
-	bufer := bytes.Buffer{}
-	enc := gob.NewEncoder(&bufer)
-	enc.Encode(t)
+	//t := time.Now()
+	//bufer := bytes.Buffer{}
+	//enc := gob.NewEncoder(&bufer)
+	//enc.Encode(t)
+	//
+	//dec := gob.NewDecoder(&bufer)
+	//var t1 time.Time
+	//dec.Decode(&t1)
+	////fmt.Println(t.String())
+	////fmt.Println(t1.String())
+	//fmt.Println(t.Format("2006-01-02 15:04:05.999999999 -0700 MST"))
+	//fmt.Println(t1.Format("2006-01-02 15:04:05.999999999 -0700 MST"))
 
-	dec := gob.NewDecoder(&bufer)
-	var t1 time.Time
-	dec.Decode(&t1)
-	//fmt.Println(t.String())
-	//fmt.Println(t1.String())
-	fmt.Println(t.Format("2006-01-02 15:04:05.999999999 -0700 MST"))
-	fmt.Println(t1.Format("2006-01-02 15:04:05.999999999 -0700 MST"))
+	//rh := ripemd160.New() // 新建hash器）
+	//rh.Write([]byte("blockchain"))
+	//fmt.Println(rh.Sum(nil))
+
+	// base58
+	//encoded := "1QCaxc8hutpdZ62iKZsn1TCG3nh7uPZojq"
+	//num, err := base58.Decode(encoded)
+	//if err != nil {
+	//	fmt.Printf("Demo %v, got error %s\n", encoded, err)
+	//}
+	//
+	//chk := base58.Encode(num)
+	//if encoded == string(chk) {
+	//	fmt.Printf ( "Successfully decoded then re-encoded %s\n", encoded )
+	//}
+
+
+	// bip39
+	// Generate a mnemonic for memorization or user-friendly seeds
+	//// 熵，理解成，混乱程度
+	//entropy, _ := bip39.NewEntropy(256)
+	//// 助记词
+	//mnemonic, _ := bip39.NewMnemonic(entropy)
+	//fmt.Println(mnemonic)
+	//// 生成密钥对
+	//// 基于助记词和短语密码（用户需要指定的）生成密钥种子
+	//seed := bip39.NewSeed(mnemonic, "Secret Passphrase")
+	//// 构建私钥，基于种子
+	//masterKey, _ := bip32.NewMasterKey(seed)
+	//// 构建公钥
+	//publicKey := masterKey.PublicKey()
+	//
+	//fmt.Println("PrivateKey: ", masterKey.String())
+	//fmt.Println("PublicKey: ", publicKey.String())
+
+	// 反推
+	userMnemonic := "inform undo plate foil orient where virus balcony team cargo loyal measure easily category coach develop minute copper loyal math spy hawk figure tornado"
+	// 生成熵
+	//userEntropy, _ := bip39.EntropyFromMnemonic(userMnemonic)
+	// 生成种子
+	userSeed := bip39.NewSeed(userMnemonic, "Secret Passphrase")
+	userMasterKey, _ := bip32.NewMasterKey(userSeed)
+	userPublicKey := userMasterKey.PublicKey()
+	fmt.Println("PrivateKey: ", userMasterKey.String())
+	fmt.Println("PublicKey: ", userPublicKey.String())
+
 
 }

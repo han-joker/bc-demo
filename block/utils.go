@@ -3,6 +3,7 @@ package block
 import (
 	"bytes"
 	"encoding/gob"
+	"github.com/han-joker/bc-demo/tx"
 	"time"
 )
 
@@ -14,7 +15,7 @@ type BlockData struct {
 	Time           time.Time
 	Bits           int
 	Nonce          int
-	Txs            string
+	Txs            []*tx.TX
 	TxCounter      int
 	HashCurr       Hash
 }

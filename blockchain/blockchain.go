@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/han-joker/bc-demo/block"
 	"github.com/han-joker/bc-demo/pow"
+	"github.com/han-joker/bc-demo/tx"
+	"github.com/han-joker/bc-demo/wallet"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"log"
@@ -32,7 +34,7 @@ func NewBlockchain(db *leveldb.DB) *BlockChain {
 }
 
 // 添加创世区块（第一个区块）
-func (bc *BlockChain) AddGensisBlock() *BlockChain {
+func (bc *BlockChain) AddGensisBlock(address wallet.Address) *BlockChain {
 	// 校验是否可以添加创世区块
 	if bc.lastHash != ""  {
 		// 已经存在区块，不需要再添加创世区块
@@ -40,14 +42,23 @@ func (bc *BlockChain) AddGensisBlock() *BlockChain {
 	}
 
 	// 只有 txs 是特殊
-	return bc.AddBlock("The Gensis Block.")
+	return bc.AddBlock(address)
 }
 
 // 添加区块
 // 提供区块的数据，目前是字符串
-func (bc *BlockChain) AddBlock(txs string) *BlockChain {
-	// 构建区块
-	b := block.NewBlock(bc.lastHash, txs)
+// address 添加该区块的地址
+func (bc *BlockChain) AddBlock(address wallet.Address) *BlockChain {
+	// # 构建区块
+	b := block.NewBlock(bc.lastHash)
+
+	// # 增加 CoinBase 交易
+	cbtx := tx.NewCoinbaseTX(address)
+	// 将交易加入到区块中
+	b.AddTX(cbtx)
+
+	// 处理区块交易
+
 	// 对区块做 POW，工作量证明
 	// pow 对象
 	p := pow.NewPOW(b)
@@ -59,13 +70,13 @@ func (bc *BlockChain) AddBlock(txs string) *BlockChain {
 	// 为区块设置nonce和hash
 	b.SetNonce(nonce).SetHashCurr(hash)
 
+
 	// 将区块加入到链的存储结构中
 	if bs, err := block.BlockSerialize(*b); err != nil {
 		log.Fatal("block can not be serialized.")
 	} else if err = bc.db.Put([]byte("b_" + b.GetHashCurr()), bs, nil); err != nil {
 		log.Fatal("block can not be saved")
 	}
-
 
 	// 将最后的区块哈希设置为当前区块
 	bc.lastHash = b.GetHashCurr()
@@ -108,7 +119,8 @@ func (bc *BlockChain) Iterate() {
 		}
 
 		fmt.Println("HashCurr:", b.GetHashCurr())
-		fmt.Println("TXs:", b.GetTxs())
+		//fmt.Println("TXs:", b.GetTxs())
+		fmt.Println("TXs:", b.GetTxsString())
 		fmt.Println("Time:", b.GetTime().Format(time.UnixDate))
 		fmt.Println("HashPrev:", b.GetHashPrevBlock())
 		fmt.Println()

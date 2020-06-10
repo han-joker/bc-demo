@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/han-joker/bc-demo/blockchain"
+	"github.com/han-joker/bc-demo/wallet"
 	"github.com/syndtr/goleveldb/leveldb"
 	"log"
 	"os"
@@ -24,8 +25,6 @@ func main() {
 
 	// 初始化区块链
 	bc := blockchain.NewBlockchain(db)
-	// 添加创世区块
-	bc.AddGensisBlock()
 
 	// 初始化第一个命令参数
 	arg1 := ""
@@ -40,18 +39,30 @@ func main() {
 		// 错误处理为，一旦解析失败，则 exit
 		fs := flag.NewFlagSet("create:block", flag.ExitOnError)
 		// 在集合中，添加需要解析的 flag 标志
-		txs := fs.String("txs", "", "")
+		address := fs.String("address", "", "")
 		// 解析命令行参数,
 		fs.Parse(os.Args[2:])
 		// 完成区块的创建
-		bc.AddBlock(*txs)
-	case "show":
-		bc.Iterate()
+		bc.AddBlock(*address)
 	case "init":
+		fs := flag.NewFlagSet("init", flag.ExitOnError)
+		address := fs.String("address", "", "")
+		fs.Parse(os.Args[2:])
 		// 清空
 		bc.Clear()
 		// 添加创世区块
-		bc.AddGensisBlock()
+		bc.AddGensisBlock(*address)
+
+	case "show":
+		bc.Iterate()
+	case "create:wallet":
+		// 命令行标志集（参数集 -flag）
+		fs := flag.NewFlagSet("create:wallet", flag.ExitOnError)
+		// pass 标志, *string
+		pass := fs.String("pass", "", "")
+		w := wallet.NewWallet(*pass)
+		fmt.Printf("your mnemonic: %s\n", w.GetMnemonic())
+		fmt.Printf("your address: %s \n", w.Address)
 	case "help":
 		fallthrough
 	default:
@@ -64,8 +75,9 @@ func Usage() {
 	fmt.Println("bcli is a tool for Blockchain.")
 	fmt.Println()
 	fmt.Println("Usage:")
-	fmt.Printf("\t%s\t%s\n", "bcli createblock -txs=<txs>", "create block on blockchain")
-	fmt.Printf("\t%s\t\t\t%s\n", "bcli init", "initial blockchain")
-	fmt.Printf("\t%s\t\t\t%s\n", "bcli help", "help info for bcli")
+	fmt.Printf("\t%s\t%s\n", "bcli create:block -txs=<txs>", "create block on blockchain.")
+	fmt.Printf("\t%s\t%s\n", "bcli create:wallet -pass=<pass>", "create wallet base on pass.")
+	fmt.Printf("\t%s\t\t\t%s\n", "bcli init", "initial blockchain.")
+	fmt.Printf("\t%s\t\t\t%s\n", "bcli help", "help info for bcli.")
 	fmt.Printf("\t%s\t\t\t%s\n", "bcli show", "show blocks in chain.")
 }

@@ -2,6 +2,8 @@ package block
 
 import (
 	"fmt"
+	"github.com/han-joker/bc-demo/tx"
+	"strings"
 	"time"
 )
 
@@ -14,7 +16,7 @@ const blockBits = 16
 // 区块主体
 type Block struct {
 	header    BlockHeader
-	txs       string // 交易列表
+	txs       []*tx.TX // 交易列表
 	txCounter int    // 交易计数器
 	hashCurr  Hash   // 当前区块哈市值缓存
 }
@@ -30,7 +32,7 @@ type BlockHeader struct {
 }
 
 // 构造区块
-func NewBlock(prevHash Hash, txs string) *Block {
+func NewBlock(prevHash Hash) *Block {
 	// 实例化Block
 	b := &Block{
 		header: BlockHeader{
@@ -39,8 +41,8 @@ func NewBlock(prevHash Hash, txs string) *Block {
 			time:          time.Now(),
 			bits:	blockBits,
 		},
-		txs:       txs, // 设置数据
-		txCounter: 1,   // 计数交易
+		txs: []*tx.TX{},
+		txCounter: 0,
 	}
 	return b
 }
@@ -75,12 +77,32 @@ func (b *Block) SetHashCurr(hash Hash) *Block {
 
 	return b
 }
+
+// 添加交易
+func (b *Block) AddTX(tx *tx.TX) *Block {
+	// 添加
+	b.txs = append(b.txs, tx)
+	b.txCounter ++
+
+	return b
+}
+
 // getters!
 func (b *Block) GetHashCurr() Hash {
 	return b.hashCurr
 }
-func (b *Block) GetTxs() string {
+func (b *Block) GetTxs() []*tx.TX {
 	return b.txs
+}
+func (b *Block) GetTxsString() string {
+	show := fmt.Sprintf("%d tansactions\n", b.txCounter)
+
+	txStr := []string{}
+	for i, t  := range b.txs {
+		txStr = append(txStr, fmt.Sprintf("\tindex:%d, Hash: %s, Inputs: %d, Ouputs: %d", i, t.Hash, len(t.Inputs), len(t.Outputs)))
+	}
+
+	return show + strings.Join(txStr, "\n")
 }
 func (b *Block) GetTime() time.Time {
 	return b.header.time
