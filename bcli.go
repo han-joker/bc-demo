@@ -53,6 +53,14 @@ func main() {
 		// 添加创世区块
 		bc.AddGensisBlock(*address)
 
+	case "balance":
+		fs := flag.NewFlagSet("balance", flag.ExitOnError)
+		address := fs.String("address", "", "")
+		fs.Parse(os.Args[2:])
+		// 完成区块的创建
+		fmt.Printf("Address:%s\nBalance:%d\n",
+			*address, bc.GetBalance(*address),
+			)
 	case "show":
 		bc.Iterate()
 	case "create:wallet":
@@ -77,7 +85,8 @@ func Usage() {
 	fmt.Println("Usage:")
 	fmt.Printf("\t%s\t%s\n", "bcli create:block -txs=<txs>", "create block on blockchain.")
 	fmt.Printf("\t%s\t%s\n", "bcli create:wallet -pass=<pass>", "create wallet base on pass.")
-	fmt.Printf("\t%s\t\t\t%s\n", "bcli init", "initial blockchain.")
+	fmt.Printf("\t%s\t%s\n", "bcli init -address=<address>", "initial blockchain.")
+	fmt.Printf("\t%s\t%s\n", "bcli balance -address=<address>", "get address 's balance.")
 	fmt.Printf("\t%s\t\t\t%s\n", "bcli help", "help info for bcli.")
 	fmt.Printf("\t%s\t\t\t%s\n", "bcli show", "show blocks in chain.")
 }
